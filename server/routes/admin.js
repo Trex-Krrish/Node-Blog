@@ -66,7 +66,16 @@ router.post('/admin', async (req, res) => {
 
 // *** Admin Dashboard ***
 router.get('/dashboard',authMiddleware, async (req, res) => {
-    res.render('admin/dashboard')
+    try {
+        const locals = {
+            title: 'Dashboard',
+            description: 'Admin Dashboard',
+        }
+        const data = await Post.find()
+        res.render('admin/dashboard', { locals, data, layout: adminLayout })
+    } catch (error) {
+        console.log(error)
+    }
 })
 
 // *** Admin Registration ***
@@ -83,6 +92,38 @@ router.post('/register', async (req, res) => {
             }
             res.status(500).json({ message: "Internal Server Error" })
         }
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+router.get('/add-post', authMiddleware, async (req, res) => {
+    try {
+        const locals = {
+            title: 'Add Post',
+            description: 'Admin Dashboard',
+        }
+
+        res.render('admin/add-post', { locals, layout: adminLayout })
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+router.post('/add-post', authMiddleware, async (req, res) => {
+    try {
+        try {
+            const newPost = new Post({
+                title: req.body.title,
+                body: req.body.body
+            })
+
+            await Post.create(newPost)
+            res.redirect('/dashboard')
+        } catch (error) {
+            console.log(error)
+        }
+        res.render('admin/add-post', {layout: adminLayout })
     } catch (error) {
         console.log(error)
     }
